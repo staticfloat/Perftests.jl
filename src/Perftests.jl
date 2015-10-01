@@ -64,33 +64,28 @@ macro meta(args...)
 end
 
 # This macro takes in a test expression and a PerfMetadata object
-# macro perf(ex, meta)
-#     quote
-#         if contains($meta.group, "-") || contains($meta.name, "-") || contains($meta.variant, "-")
-#             throw(ArgumentError("Benchmark group/name/variant cannot contain '-'!"))
-#         end
-#         result = @benchmark $ex
-#         stats = Benchmarks.SummaryStatistics(result)
-#         pts = Benchmarks.pretty_time_string
-#         time_str = "$(pts(stats.elapsed_time_center))"
-#         if !isnull(stats.elapsed_time_lower) && !isnull(stats.elapsed_time_upper)
-#             lower = stats.elapsed_time_lower.value
-#             upper = stats.elapsed_time_upper.value
-#             time_str *= " [$(pts(lower)), $(pts(upper))]"
-#         end
-#         if length($meta.variant) > 0
-#             csvpath = "$resultsdir/$($meta.group)-$($meta.name)-$($meta.variant).csv"
-#             println("$($meta.group)/$($meta.name)/$($meta.variant) done in $time_str")
-#         else
-#             csvpath = "$resultsdir/$($meta.group)-$($meta.name).csv"
-#             println("$($meta.group)/$($meta.name) done in $time_str")
-#         end
-#         writecsv(joinpath(perfdir, csvpath), result.samples)
-#     end
-# end
 macro perf(ex, meta)
     quote
-        @benchmark $ex
+        if contains($meta.group, "-") || contains($meta.name, "-") || contains($meta.variant, "-")
+            throw(ArgumentError("Benchmark group/name/variant cannot contain '-'!"))
+        end
+        result = @benchmark $(esc(ex))
+        stats = Benchmarks.SummaryStatistics(result)
+        pts = Benchmarks.pretty_time_string
+        time_str = "$(pts(stats.elapsed_time_center))"
+        if !isnull(stats.elapsed_time_lower) && !isnull(stats.elapsed_time_upper)
+            lower = stats.elapsed_time_lower.value
+            upper = stats.elapsed_time_upper.value
+            time_str *= " [$(pts(lower)), $(pts(upper))]"
+        end
+        if length($meta.variant) > 0
+            csvpath = "$resultsdir/$($meta.group)-$($meta.name)-$($meta.variant).csv"
+            println("$($meta.group)/$($meta.name)/$($meta.variant) done in $time_str")
+        else
+            csvpath = "$resultsdir/$($meta.group)-$($meta.name).csv"
+            println("$($meta.group)/$($meta.name) done in $time_str")
+        end
+        writecsv(joinpath(perfdir, csvpath), result.samples)
     end
 end
 

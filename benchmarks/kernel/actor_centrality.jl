@@ -9,7 +9,7 @@ end
 
 typealias Graph Dict{UTF8String, Node}
 
-function get(G::Graph, name)
+function get_graph(G::Graph, name)
     if haskey(G, name)
         return G[name]
     end
@@ -45,7 +45,7 @@ function read_graph()
         while !eof(io)
             k = split(strip(readline(io)), "\t")
             actor, movie = k[1], join(k[2:3], "_")
-            ac, mn = get(G, actor), get(G, movie)
+            ac, mn = get_graph(G, actor), get_graph(G, movie)
             push!(actors, actor)
             push!(ac.n, mn)
             push!(mn.n, ac)
