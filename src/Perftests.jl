@@ -1,6 +1,6 @@
 module Perftests
 
-export get_perf_groups, run_perf_groups, @perf, @meta
+export get_perf_groups, run_perf_groups, @perf, meta
 
 using Benchmarks
 using Compat
@@ -8,9 +8,11 @@ using Compat
 # This is where we expect to get our performance regression code
 const perfdir = abspath(joinpath(dirname(@__FILE__),"../benchmarks/"))
 
-# If we don't already have one, create a results directory
+# This is the default group, set by run_perf_groups() below
+default_group = ""
+
+# This is the directory where we'll plop out our .csv files
 const resultsdir = joinpath(perfdir, "../test/results-$(Base.GIT_VERSION_INFO.commit)")
-try mkdir(resultsdir) end
 
 
 # This object represents metadata about a perf test; group/name/variant is a hierarchical
@@ -18,7 +20,7 @@ try mkdir(resultsdir) end
 # defaults to the name of the directory holding the test, variant defaults to the empty string.
 # Description is a human-readable description of the test, and issue is the JuliaLang github repo
 # issue (if any) related to this test.
-immutable PerfMetadata
+immutable meta
     group::AbstractString
     name::AbstractString
     variant::AbstractString
@@ -26,47 +28,17 @@ immutable PerfMetadata
     description::AbstractString
     issue::UInt32
 
-    PerfMetadata(group, name, variant, desc; issue=0) = new(group, name, variant, desc, issue)
-end
-
-# This macro constructs the PerfMetadata info object, but with default arguments
-macro meta(args...)
-    kwargs = filter( x -> isa(x, Expr), collect(args))
-    args = filter( x -> !isa(x, Expr), collect(args))
-    quote
-        # First off, if we don't have all
-        if length($args) < 4
-            # This is a protection against someone trying to run perf stuff in the terminal
-            try
-                group = basename(dirname(Base.source_path()))
-            catch
-                group = "UNKNOWN"
-            end
-        else
-            group = splice!($args,1)
-        end
-
-        if length($args) < 3
-            variant = ""
-        else
-            variant = splice!($args,2)
-        end
-
-        if length($args) < 2
-            description = ""
-        else
-            description = splice!($args,2)
-        end
-
-        name = splice!($args, 1)
-        PerfMetadata(group, name, variant, description; $(kwargs...))
-    end
+    meta(name; issue=0) = new(default_group, name, "", "", issue)
+    meta(name, desc; issue=0) = new(default_group, name, "", desc, issue)
+    meta(name, variant, desc; issue=0) = new(default_group, name, variant, desc, issue)
+    meta(group, name, variant, desc; issue=0) = new(group, name, variant, desc, issue)
 end
 
 # This macro takes in a test expression and a PerfMetadata object
-macro perf(ex, meta)
+macro perf(ex, outer_meta)
     quote
-        if contains($meta.group, "-") || contains($meta.name, "-") || contains($meta.variant, "-")
+        meta = $(esc(outer_meta))
+        if contains(meta.group, "-") || contains(meta.name, "-") || contains(meta.variant, "-")
             throw(ArgumentError("Benchmark group/name/variant cannot contain '-'!"))
         end
         result = @benchmark $(esc(ex))
@@ -78,12 +50,12 @@ macro perf(ex, meta)
             upper = stats.elapsed_time_upper.value
             time_str *= " [$(pts(lower)), $(pts(upper))]"
         end
-        if length($meta.variant) > 0
-            csvpath = "$resultsdir/$($meta.group)-$($meta.name)-$($meta.variant).csv"
-            println("$($meta.group)/$($meta.name)/$($meta.variant) done in $time_str")
+        if length(meta.variant) > 0
+            csvpath = "$resultsdir/$(meta.group)-$(meta.name)-$(meta.variant).csv"
+            println("$(meta.group)/$(meta.name)/$(meta.variant) done in $time_str")
         else
-            csvpath = "$resultsdir/$($meta.group)-$($meta.name).csv"
-            println("$($meta.group)/$($meta.name) done in $time_str")
+            csvpath = "$resultsdir/$(meta.group)-$(meta.name).csv"
+            println("$(meta.group)/$(meta.name) done in $time_str")
         end
         writecsv(joinpath(perfdir, csvpath), result.samples)
     end
@@ -100,12 +72,16 @@ function run_perf_groups()
 end
 
 function run_perf_groups(perf_groups)
+    global default_group
     # Write out environment to $resultsdir/env.csv
     cd(perfdir)
+    try mkdir(resultsdir) end
     writecsv(joinpath(perfdir, resultsdir, "env.csv"), Benchmarks.Environment())
 
     # Iterate, my friend.  Iterate.
     for dir in perf_groups
+        # Set the default group first
+        default_group = dir
         println("Running $dir/perf.jl...")
         include(joinpath(perfdir,dir,"perf.jl"))
     end

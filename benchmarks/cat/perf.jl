@@ -5,6 +5,7 @@ function hvcat_perf(a,b)
 end
 
 function hvcat_setind_perf(a, b)
+    n = size(a,1)
     c = Array(Float64,2n,2n)
     c[  1:n,    1:n  ] = a
     c[  1:n,  n+1:end] = b
@@ -19,6 +20,7 @@ function hcat_perf(a,b)
 end
 
 function hcat_setind_perf(a,b)
+    n = size(a,1)
     c = Array(Float64, n, 4n)
     c[:,    1:  n] = a
     c[:,  n+1: 2n] = b
@@ -32,6 +34,7 @@ function vcat_perf(a,b)
 end
 
 function vcat_setind_perf(a,b)
+    n = size(a,1)
     c = Array(Float64, 4n, n)
     c[   1: n, :] = a
     c[ n+1:2n, :] = b
@@ -45,6 +48,7 @@ function catnd_perf(a,b)
 end
 
 function catnd_setind_perf(a, b)
+    n = size(a,2)
     c = Array(Float64, 1, n, 4n, 1)
     c[1,:,   1: n,1] = a
     c[1,:, n+1:2n,1] = b
@@ -53,22 +57,19 @@ function catnd_setind_perf(a, b)
     return c
 end
 
-println("point 1")
 sizes = [("small", 5), ("large", 500)]
-println("point 2")
 for (size_str, n) in sizes
-    println("point 3")
     a = rand(n,n)
     b = rand(n,n)
-    @perf hvcat_perf(a,b) @meta("hvcat", size_str, "Horizontal/vertical matrix concatenation")
-    #@perf hvcat_setind_perf(a,b) @meta("hvcat_setind", size_str, "Horizontal/vertical matrix concatenation using setindex")
-    #@perf hcat_perf(a,b) @meta("hcat", size_str, "Horizontal matrix concatenation")
-    #@perf hcat_setind_perf(a,b) @meta("hcat_setind", size_str, "Horizontal matrix concatenation using setindex")
-    #@perf vcat_perf(a,b) @meta("vcat", size_str, "Vertical matrix concatenation")
-    #@perf vcat_setind_perf(a,b) @meta("vcat_setind", size_str, "Vertical matrix concatenation using setindex")
+    @perf hvcat_perf(a,b) meta("hvcat", size_str, "Horizontal/vertical matrix concatenation")
+    @perf hvcat_setind_perf(a,b) meta("hvcat_setind", size_str, "Horizontal/vertical matrix concatenation using setindex")
+    @perf hcat_perf(a,b) meta("hcat", size_str, "Horizontal matrix concatenation")
+    @perf hcat_setind_perf(a,b) meta("hcat_setind", size_str, "Horizontal matrix concatenation using setindex")
+    @perf vcat_perf(a,b) meta("vcat", size_str, "Vertical matrix concatenation")
+    @perf vcat_setind_perf(a,b) meta("vcat_setind", size_str, "Vertical matrix concatenation using setindex")
 
     a = rand(1,n,n,1)
     b = rand(1,n,n)
-    #@perf catnd_perf(a,b) @meta("catnd", size_str, "N-dimensional matrix concatenation")
-    #@perf catnd_setind_perf(a,b) @meta("catnd_setind", size_str, "N-dimensional matrix concatenation using setindex")
+    @perf catnd_perf(a,b) meta("catnd", size_str, "N-dimensional matrix concatenation")
+    @perf catnd_setind_perf(a,b) meta("catnd_setind", size_str, "N-dimensional matrix concatenation using setindex")
 end
