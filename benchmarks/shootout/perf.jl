@@ -46,11 +46,9 @@ include("meteor_contest.jl")
 @perf meteor_contest() meta("meteor_contest", "Search for solutions to shape packing puzzle")
 
 include("nbody.jl")
-using NBody
 @perf NBody.nbody() meta("nbody", "Double-precision N-body simulation")
 
 include("nbody_vec.jl")
-using NBodyVec
 @perf NBodyVec.nbody_vec() meta("nbody_vec", "A vectorized double-precision N-body simulation")
 
 include("pidigits.jl")
