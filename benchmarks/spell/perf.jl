@@ -13,6 +13,9 @@
 # @kmsquire, 2013-11-29
 #
 
+module SpellPerf
+import Perftests: @perf, meta
+
 words(text) = eachmatch(r"[a-z]+", lowercase(text))
 
 function train(features)
@@ -154,3 +157,5 @@ const tests1 = Dict("access"=> "acess", "accessing"=> "accesing", "accommodation
 "whether"=> "wether", "wrote"=> "rote wote")
 
 @perf spelltest(tests1) meta("spell", "Peter Norvig's spell corrector")
+
+end # module

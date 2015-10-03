@@ -1,5 +1,8 @@
 # This file is a part of Julia. License is MIT: http://julialang.org/license
 
+module ArrayPerf
+import Perftests: @perf, meta
+
 include("indexing.jl")
 briefname(A) = typeof(A).name.name
 # Run through small array tests, large array tests, Integer array tests, Float array tests, etc...
@@ -30,3 +33,5 @@ for n = [100, 250, 500, 1000]
     A = randn(n,n)
     @perf lucompletepivCopy!(A) meta("lupiv_view", "$(n)x$(n)", "LU facorization with view slices")
 end
+
+end # module

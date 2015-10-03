@@ -1,3 +1,6 @@
+module KernelPerf
+import Perftests: @perf, meta
+
 abstract List{T}
 
 type Nil{T} <: List{T}
@@ -121,3 +124,5 @@ logical_y = map(iseven, 1:length(x))
 @perf devec_add1!(x,y) meta("indexing", "devectorized_add1", "Devectorized increment vector x at locations y")
 @perf add1!(x,logical_y) meta("indexing", "add1_logical", "Increment x_i if y_i is true")
 @perf devec_add1_logical!(x,logical_y) meta("indexing", "devectorized_add1_logical", "Devectorized increment x_i if y_i is true")
+
+end #module

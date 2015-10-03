@@ -1,5 +1,8 @@
 # This file is a part of Julia. License is MIT: http://julialang.org/license
 
+module CatPerf
+import Perftests: @perf, meta
+
 function hvcat_perf(a,b)
     return [a b; b a]
 end
@@ -73,3 +76,5 @@ for (size_str, n) in sizes
     @perf catnd_perf(a,b) meta("catnd", size_str, "N-dimensional matrix concatenation")
     @perf catnd_setind_perf(a,b) meta("catnd_setind", size_str, "N-dimensional matrix concatenation using setindex")
 end
+
+end # module

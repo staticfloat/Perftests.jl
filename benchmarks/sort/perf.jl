@@ -1,5 +1,8 @@
 # This file is a part of Julia. License is MIT: http://julialang.org/license
 
+module SortPerf
+import Perftests: @perf, meta
+
 using Base.Sort
 import Base.Sort: QuickSort, MergeSort, InsertionSort
 
@@ -73,3 +76,5 @@ for (T, typename, randfn!) in [(Int, string(Int), randint_fn!(10)),
         end
     end
 end
+
+end # module

@@ -1,5 +1,8 @@
 # This file is a part of Julia. License is MIT: http://julialang.org/license
 
+module BlapackPerf
+import Perftests: @perf, meta
+
 sizes = [("tiny", 1), ("small", 4), ("medium", 6), ("large", 8), ("huge", 10)]
 for (size_str, exp) in sizes
     # The length of vectors, size of matrices, etc...
@@ -37,3 +40,5 @@ for (size_str, exp) in sizes
     @perf qrfact(A) meta("qrfact", size_str, "QR factorizaiton with lengths 2^$exp")
     @perf lufact(A) meta("lufact", size_str, "LU factorizaiton with lengths 2^$exp")
 end
+
+end # module

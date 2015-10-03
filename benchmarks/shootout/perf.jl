@@ -1,5 +1,8 @@
 # This file is a part of Julia. License is MIT: http://julialang.org/license
 
+module ShootoutPerf
+import Perftests: @perf, meta
+
 # Find relative paths easily
 rpath(filename) = joinpath(dirname(@__FILE__), filename)
 function download_if_needed(url)
@@ -64,3 +67,5 @@ infile = rpath("revcomp-input.txt")
 
 include("spectralnorm.jl")
 @perf spectralnorm() meta("spectralnorm", "Eigenvalue using the power method")
+
+end # module

@@ -1,5 +1,8 @@
 # This file is a part of Julia. License is MIT: http://julialang.org/license
 
+module SimdPerf
+import Perftests: @perf, meta
+
 # Compute y += a*x using @simd for vectors x and y
 function simd_axpy( a, x, y )
     # LLVM's auto-vectorizer typically vectorizes this loop even without @simd
@@ -62,3 +65,5 @@ for t in [Float32,Float64]
     Vy = zeros(t,m,n)
     @perf flog_fdtd(10,U,Vx,Vy,A,B) meta("seismic_fdtd", string(t), "2D finite-difference seismic simulation for $t")
 end
+
+end # module

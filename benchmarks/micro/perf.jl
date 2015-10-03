@@ -1,5 +1,8 @@
 # This file is a part of Julia. License is MIT: http://julialang.org/license
 
+module MicroPerf
+import Perftests: @perf, meta
+
 ## recursive fib ##
 fib(n) = n < 2 ? n : fib(n-1) + fib(n-2)
 @perf fib(20) meta("fib", "Recursive fibonacci")
@@ -72,7 +75,7 @@ end
 ## slow pi series, vectorized ##
 function pisumvec()
     s = 0.0
-    a = [1:10000]
+    a = [1:10000...]
     for j = 1:500
         s = sum(1./(a.^2))
     end
@@ -118,3 +121,5 @@ end
     printfd(1)
     @perf printfd(100000) meta("printfd", "Printing to a file descriptor")
 end
+
+end # module
