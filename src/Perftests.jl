@@ -52,10 +52,10 @@ macro perf(ex, outer_meta)
         end
         if length(meta.variant) > 0
             csvpath = "$resultsdir/$(meta.group)-$(meta.name)-$(meta.variant).csv"
-            println("$(meta.group)/$(meta.name)/$(meta.variant) done in $time_str")
+            println("  $(meta.group)/$(meta.name)/$(meta.variant) done in $time_str")
         else
             csvpath = "$resultsdir/$(meta.group)-$(meta.name).csv"
-            println("$(meta.group)/$(meta.name) done in $time_str")
+            println("  $(meta.group)/$(meta.name) done in $time_str")
         end
         writecsv(joinpath(perfdir, csvpath), result.samples)
     end
@@ -82,8 +82,12 @@ function run_perf_groups(perf_groups)
     for dir in perf_groups
         # Set the default group first
         default_group = dir
+        start_time = time()
         println("Running $dir/perf.jl...")
         include(joinpath(perfdir,dir,"perf.jl"))
+
+        ns_elapsed = (time() - start_time)*1e9
+        println("Finished $dir tests in $(Benchmarks.pretty_time_string(ns_elapsed))")
     end
 end
 
