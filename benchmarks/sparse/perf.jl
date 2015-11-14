@@ -17,7 +17,7 @@ function skinny_index(A,I)
     A[I,1]
 end
 
-for (m_log2,nz_log2) in matsize
+for (m_log2, nz_log2) in matsize
     m = 2.^m_log2
     nz = 2.^nz_log2
     A = sprand(m,1,nz/m)
